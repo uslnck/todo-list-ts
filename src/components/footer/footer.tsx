@@ -1,21 +1,24 @@
-import { Component } from 'react';
-import TasksFilter from '../tasks-filter';
-import './footer.css';
+import { Component } from "react";
+import TasksFilter from "../tasks-filter";
+import "./footer.css";
 
-import { AppProps } from '../app/app';
+interface FooterProps {
+  setFilter: (filter: string) => void;
+  deleteCompleted: () => void;
+  filter: string;
+  remainingCount: number;
+}
 
-export default class Footer extends Component<AppProps> {
+export default class Footer extends Component<FooterProps> {
   render() {
-    const { getRemainingCount, setFilter, deleteCompleted, filter } =
-      this.props;
-    const count = getRemainingCount();
+    const { setFilter, deleteCompleted, filter, remainingCount } = this.props;
     return (
-      <footer className='footer'>
-        <span className='todo-count'>{`${count} items left`}</span>
-        <ul className='filters'>
+      <footer className="footer">
+        <span className="todo-count">{`${remainingCount} items left`}</span>
+        <ul className="filters">
           <TasksFilter setFilter={setFilter} filter={filter} />
         </ul>
-        <button onClick={deleteCompleted} className='clear-completed'>
+        <button onClick={deleteCompleted} className="clear-completed">
           Clear completed
         </button>
       </footer>

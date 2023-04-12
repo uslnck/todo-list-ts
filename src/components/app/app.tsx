@@ -4,63 +4,52 @@ import Footer from "../footer";
 
 import { Component } from "react";
 import "./app.css";
-import formatDistanceToNow from "date-fns/formatDistanceToNow";
+import fnsDate from "../../utils/helpers/fnsDate";
 
-export type AppProps = any;
+export interface ITask {
+  description: string;
+  created: Date;
+  id: number;
+  completed: boolean;
+  shownDate: string;
+}
 
-type AppState = {
-  taskData: Array<{
-    description: string;
-    created: Date | number;
-    id: number;
-    completed: boolean;
-    shownDate: string;
-  }>;
+interface IState {
+  taskData: ITask[];
   filter: string;
-};
+}
 
-// export interface MyProps<T> {
-//   onDeleted(id:T): object
-// }
-
-const formatDistanceOptions = {
-  addSuffix: true,
-  includeSeconds: true,
-};
-
-export default class App extends Component<AppProps, AppState> {
-  getDate = () => {
-    return formatDistanceToNow(new Date(), formatDistanceOptions);
-  };
-
-  state: AppState = {
+export default class App extends Component<{}, IState> {
+  state = {
     taskData: [
       {
         description: "First task",
         created: new Date(),
         id: 1,
         completed: false,
-        shownDate: this.getDate(),
+        shownDate: fnsDate(),
       },
       {
         description: "Second task",
         created: new Date(),
         id: 2,
         completed: false,
-        shownDate: this.getDate(),
+        shownDate: fnsDate(),
       },
       {
         description: "Third task",
         created: new Date(),
         id: 3,
         completed: false,
-        shownDate: this.getDate(),
+        shownDate: fnsDate(),
       },
     ],
     filter: "all",
   };
 
-  setFilter = (pressedFilter: string) => {
+  maxId = 10;
+
+  setFilter = (pressedFilter: string): void => {
     switch (pressedFilter) {
       case "all":
         this.setState({ filter: "all" });
@@ -76,7 +65,7 @@ export default class App extends Component<AppProps, AppState> {
     }
   };
 
-  onTaskClick = (id: number) => {
+  onTaskClick = (id: number): void => {
     this.setState(({ taskData }) => {
       const idx = taskData.findIndex((el) => el.id === id);
       const updatedElement = Object.assign(taskData[idx], {
@@ -91,7 +80,7 @@ export default class App extends Component<AppProps, AppState> {
     });
   };
 
-  deleteTask = (id: number) => {
+  deleteTask = (id: number): void => {
     this.setState(({ taskData }) => {
       const idx = taskData.findIndex((el) => el.id === id);
       const newTaskData = [
@@ -102,32 +91,28 @@ export default class App extends Component<AppProps, AppState> {
     });
   };
 
-  deleteCompleted = () => {
+  deleteCompleted = (): void => {
     this.setState(({ taskData }) => {
       const newTaskData = [...taskData].filter(({ completed }) => !completed);
       return { taskData: newTaskData };
     });
   };
 
-  getRemainingCount = () => {
+  calculateRemainingCount = (): number => {
     let counter = 0;
     this.state.taskData.forEach(({ completed }) => {
-      if (!completed) {
-        counter++;
-      }
+      if (!completed) counter++;
     });
     return counter;
   };
 
-  maxId = 10;
-
-  addTask = (text: string) => {
-    const newItem = {
+  addTask = (text: string): void => {
+    const newItem: ITask = {
       description: text,
       created: new Date(),
       id: this.maxId++,
       completed: false,
-      shownDate: this.getDate(),
+      shownDate: fnsDate(),
     };
 
     this.setState(({ taskData }) => {
@@ -138,20 +123,20 @@ export default class App extends Component<AppProps, AppState> {
     this.refreshDates();
   };
 
-  refreshDates = () => {
+  refreshDates = (): void => {
     this.setState(({ taskData }) => {
-      const newTaskData = [...taskData];
-      newTaskData.forEach((el) => {
-        el.shownDate = formatDistanceToNow(el.created, formatDistanceOptions);
-      });
+      const newTaskData = taskData.map((todo) => ({
+        ...todo,
+        shownDate: fnsDate(todo.created),
+      }));
 
       return { taskData: newTaskData };
     });
   };
 
-  test = () => {};
-
   render() {
+    const count = this.calculateRemainingCount();
+
     return (
       <div>
         <NewTaskForm onTaskAdded={this.addTask} />
@@ -164,7 +149,7 @@ export default class App extends Component<AppProps, AppState> {
         <Footer
           setFilter={this.setFilter}
           deleteCompleted={this.deleteCompleted}
-          getRemainingCount={this.getRemainingCount}
+          remainingCount={count}
           filter={this.state.filter}
         />
       </div>
