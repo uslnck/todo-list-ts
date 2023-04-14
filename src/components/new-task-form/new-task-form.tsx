@@ -1,6 +1,5 @@
-import { Component, FormEvent } from "react";
+import { Component, FormEvent, ChangeEvent } from "react";
 import "./new-task-form.css";
-
 interface NewTaskFormProps {
   onTaskAdded: (text: string) => void;
 }
@@ -17,7 +16,7 @@ export default class NewTaskForm extends Component<
     label: "",
   };
 
-  onLabelChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+  onLabelChange = (e: ChangeEvent<HTMLInputElement>): void => {
     this.setState({
       label: e.target.value,
     });
@@ -33,7 +32,7 @@ export default class NewTaskForm extends Component<
     return (
       <form onSubmit={this.onSubmit}>
         <header className="header">
-          <h1>todos</h1>
+          {/* <h1>todos</h1> */}
           <input
             className="new-todo"
             placeholder="What needs to be done?"

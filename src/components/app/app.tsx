@@ -2,7 +2,7 @@ import TaskList from "../task-list";
 import NewTaskForm from "../new-task-form";
 import Footer from "../footer";
 
-import { Component } from "react";
+import { Component, MouseEvent } from "react";
 import "./app.css";
 import fnsDate from "../../utils/helpers/fnsDate";
 
@@ -20,7 +20,7 @@ interface IState {
 }
 
 export default class App extends Component<{}, IState> {
-  state = {
+  state: IState = {
     taskData: [
       {
         description: "First task",
@@ -65,10 +65,11 @@ export default class App extends Component<{}, IState> {
     }
   };
 
-  onTaskClick = (id: number): void => {
+  handleTaskClick = (e: MouseEvent, id: number): void => {
+    e.stopPropagation();
     this.setState(({ taskData }) => {
       const idx = taskData.findIndex((el) => el.id === id);
-      const updatedElement = Object.assign(taskData[idx], {
+      const updatedElement: ITask = Object.assign(taskData[idx], {
         completed: !taskData[idx].completed,
       });
       const newTaskData = [
@@ -80,7 +81,8 @@ export default class App extends Component<{}, IState> {
     });
   };
 
-  deleteTask = (id: number): void => {
+  handleTaskDelete = (e: MouseEvent, id: number): void => {
+    e.stopPropagation();
     this.setState(({ taskData }) => {
       const idx = taskData.findIndex((el) => el.id === id);
       const newTaskData = [
@@ -142,8 +144,8 @@ export default class App extends Component<{}, IState> {
         <NewTaskForm onTaskAdded={this.addTask} />
         <TaskList
           todos={this.state.taskData}
-          onDeleted={this.deleteTask}
-          onClicked={this.onTaskClick}
+          onDelete={this.handleTaskDelete}
+          onClick={this.handleTaskClick}
           filter={this.state.filter}
         />
         <Footer

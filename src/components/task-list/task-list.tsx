@@ -1,35 +1,35 @@
 import Task from "../task";
-import { Component } from "react";
+import { Component, MouseEvent } from "react";
 import "./task-list.css";
 import { ITask } from "../app/app";
 
 interface TaskListProps {
   todos: ITask[];
-  onDeleted: (id: number) => void;
-  onClicked: (id: number) => void;
+  onDelete: (e: MouseEvent, id: number) => void;
+  onClick: (e: MouseEvent, id: number) => void;
   filter: string;
 }
 
 export default class TaskList extends Component<TaskListProps> {
   render() {
-    const { todos, onDeleted, onClicked, filter } = this.props;
+    const { todos, onDelete, onClick, filter } = this.props;
     const elements = todos
-      .filter((todo) => {
+      .filter((todo: ITask) => {
         const { completed } = todo;
         if (filter === "all") return true;
         else if (filter === "completed") return completed;
         else if (filter === "active") return !completed;
         else throw new Error();
       })
-      .map((todo) => {
+      .map((todo: ITask) => {
         const { id, ...todoProps } = todo;
         return (
           <li key={id}>
             <Task
               id={id}
               {...todoProps}
-              onDeleted={() => onDeleted(id)}
-              onClicked={() => onClicked(id)}
+              onDelete={(e: MouseEvent) => onDelete(e, id)}
+              onClick={(e: MouseEvent) => onClick(e, id)}
               todo={todo}
             />
           </li>

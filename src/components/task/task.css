@@ -1,0 +1,29 @@
+.view {
+  display: flex;
+  flex-direction: column;
+}
+
+.description {
+  background: rgba(0, 0, 0, 0.003);
+  border: none;
+  box-sizing: border-box;
+  color: inherit;
+  font-family: inherit;
+  font-size: 18px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: inherit;
+  height: 45px;
+  line-height: 1.4em;
+  margin: 0;
+  overflow-y: hidden;
+  padding: 10px;
+  padding-left: 0;
+  position: relative;
+  resize: vertical;
+  width: 82%;
+}
+
+.description:focus {
+  border: 2px solid rgb(13, 215, 13);
+}
