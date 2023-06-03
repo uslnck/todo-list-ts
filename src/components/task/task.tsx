@@ -64,14 +64,20 @@ const Task: React.FC<TaskProps> = ({
     // setIsChecked(e.target.checked);
     if (localStorage.getItem(`task_${id}_checked`))
       localStorage.removeItem(`task_${id}_checked`);
-    else {
-      localStorage.setItem(`task_${id}_checked`, 1);
-      setTimerPaused(true);
-      const remainingMs = localStorage.getItem(`task_${id}_remainingMs`);
-      localStorage.setItem(`task_${id}_startTime`, Date.now());
-      localStorage.setItem(`task_${id}_remainingMs`, remainingMs);
-      setCountdownVisible(true);
-      // пока дальше отсчитывает в паузе
+    else localStorage.setItem(`task_${id}_checked`, 1);
+
+    if (localStorage.getItem(`task_${id}_paused`)) {
+      localStorage.removeItem(`task_${id}_paused`);
+    } else {
+      localStorage.setItem(`task_${id}_paused`, 1);
+    }
+    setTimerPaused(!timerPaused);
+    if (countdownRef.current) {
+      if (timerPaused) {
+        countdownRef.current.start();
+      } else {
+        countdownRef.current.pause();
+      }
     }
   };
 
