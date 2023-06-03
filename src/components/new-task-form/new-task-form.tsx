@@ -1,4 +1,4 @@
-import { Component, FormEvent, ChangeEvent } from "react";
+import { Component, ChangeEvent } from "react";
 import "./new-task-form.css";
 
 interface NewTaskFormProps {
@@ -36,22 +36,6 @@ export default class NewTaskForm extends Component<
       label: e.target.value,
     });
   };
-
-  // onSubmit = (e: FormEvent<HTMLFormElement>): void => {
-  //   e.preventDefault();
-  //   this.props.onTaskAdded(
-  //     this.state.label,
-  //     this.state.minutes,
-  //     this.state.seconds,
-  //     this.state.hours,
-  //     this.state.days
-  //   );
-  //   this.setState({ label: "" });
-  //   this.setState({ seconds: 0 });
-  //   this.setState({ minutes: 0 });
-  //   this.setState({ hours: 0 });
-  //   this.setState({ days: 0 });
-  // };
 
   onMinutesChange = (e: ChangeEvent<HTMLInputElement>): void => {
     this.setState({
