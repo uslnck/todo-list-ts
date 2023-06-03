@@ -75,15 +75,39 @@ const Task: React.FC<TaskProps> = ({
     }
   };
 
+  const countdownRef = useRef(null);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const handlePause = () => {
+    setIsPaused(!isPaused);
+    if (countdownRef.current) {
+      if (isPaused) {
+        countdownRef.current.start();
+      } else {
+        countdownRef.current.pause();
+      }
+    }
+  };
+
   const handleTimerCompleted = () => {
     localStorage.setItem(`task_${id}_expired`, 1);
     setTimerCompleted(true);
   };
 
   const handlePauseResume = () => {
-    if (timerPaused) localStorage.removeItem(`task_${id}_paused`);
-    else localStorage.setItem(`task_${id}_paused`, 1);
+    if (localStorage.getItem(`task_${id}_paused`)) {
+      localStorage.removeItem(`task_${id}_paused`);
+    } else {
+      localStorage.setItem(`task_${id}_paused`, 1);
+    }
     setTimerPaused(!timerPaused);
+    if (countdownRef.current) {
+      if (timerPaused) {
+        countdownRef.current.start();
+      } else {
+        countdownRef.current.pause();
+      }
+    }
   };
 
   const timerRenderer = ({ days, hours, minutes, seconds }: any): any => {
@@ -94,10 +118,13 @@ const Task: React.FC<TaskProps> = ({
       return <span>Timer expired</span>;
     } else if (timerPaused) {
       return (
-        <div>
-          <span>Timer paused</span>
+        <>
+          <span>
+            Paused on {days}d {formatTimeValue(hours)}:
+            {formatTimeValue(minutes)}:{formatTimeValue(seconds)}
+          </span>
           <button onClick={handlePauseResume}> Resume</button>
-        </div>
+        </>
       );
     } else {
       return (
@@ -187,10 +214,10 @@ const Task: React.FC<TaskProps> = ({
                 Date.now() +
                 parseInt(localStorage.getItem(`task_${id}_remainingMs`))
               }
+              ref={countdownRef}
               onComplete={handleTimerCompleted}
               renderer={timerRenderer}
-              // @ts-ignore
-              // paused={timerPaused}
+              // onPause={handlePauseResume}
             />
           )}
         </div>
