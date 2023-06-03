@@ -1,8 +1,7 @@
-//@ts-nocheck
 import { useRef, useState, useEffect } from "react";
 import "./task.css";
 import { ITask } from "../app/app";
-import Countdown from "react-countdown";
+import Countdown, { CountdownApi } from "react-countdown";
 
 interface TaskProps extends ITask {
   todo: ITask;
@@ -54,40 +53,33 @@ const Task: React.FC<TaskProps> = ({
     if (!isEditing) onClick(e);
   };
 
-  const formatTimeValue = (value: any) => {
+  const formatTimeValue = (value: number) => {
     return value.toString().padStart(2, "0");
   };
 
   const handleCheckboxChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ): void => {
-    // setIsChecked(e.target.checked);
+    if (timerPaused && !localStorage.getItem(`task_${id}_checked`)) {
+      localStorage.setItem(`task_${id}_checked`, "1");
+      return;
+    }
+    if (!timerPaused && localStorage.getItem(`task_${id}_checked`)) {
+      localStorage.removeItem(`task_${id}_checked`);
+      return;
+    }
+
     if (localStorage.getItem(`task_${id}_checked`))
       localStorage.removeItem(`task_${id}_checked`);
-    else localStorage.setItem(`task_${id}_checked`, 1);
+    else localStorage.setItem(`task_${id}_checked`, "1");
 
-    if (localStorage.getItem(`task_${id}_paused`)) {
+    if (localStorage.getItem(`task_${id}_paused`))
       localStorage.removeItem(`task_${id}_paused`);
-    } else {
-      localStorage.setItem(`task_${id}_paused`, 1);
-    }
+    else localStorage.setItem(`task_${id}_paused`, "1");
+
     setTimerPaused(!timerPaused);
     if (countdownRef.current) {
       if (timerPaused) {
-        countdownRef.current.start();
-      } else {
-        countdownRef.current.pause();
-      }
-    }
-  };
-
-  const countdownRef = useRef(null);
-  const [isPaused, setIsPaused] = useState(false);
-
-  const handlePause = () => {
-    setIsPaused(!isPaused);
-    if (countdownRef.current) {
-      if (isPaused) {
         countdownRef.current.start();
       } else {
         countdownRef.current.pause();
@@ -96,16 +88,15 @@ const Task: React.FC<TaskProps> = ({
   };
 
   const handleTimerCompleted = () => {
-    localStorage.setItem(`task_${id}_expired`, 1);
+    localStorage.setItem(`task_${id}_expired`, "1");
     setTimerCompleted(true);
   };
 
   const handlePauseResume = () => {
-    if (localStorage.getItem(`task_${id}_paused`)) {
+    if (localStorage.getItem(`task_${id}_paused`))
       localStorage.removeItem(`task_${id}_paused`);
-    } else {
-      localStorage.setItem(`task_${id}_paused`, 1);
-    }
+    else localStorage.setItem(`task_${id}_paused`, "1");
+
     setTimerPaused(!timerPaused);
     if (countdownRef.current) {
       if (timerPaused) {
@@ -116,43 +107,55 @@ const Task: React.FC<TaskProps> = ({
     }
   };
 
-  const timerRenderer = ({ days, hours, minutes, seconds }: any): any => {
+  const timerRenderer = ({
+    days,
+    hours,
+    minutes,
+    seconds,
+  }: {
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+  }): React.ReactNode => {
     if (localStorage.getItem(`task_${id}_empty`))
       return <span>Timer hasn't been set</span>;
 
-    if (localStorage.getItem(`task_${id}_expired`)) {
+    const formattedTime = `${days}d ${formatTimeValue(hours)}:${formatTimeValue(
+      minutes
+    )}:${formatTimeValue(seconds)}`;
+
+    if (timerCompleted) {
       return <span>Timer expired</span>;
     } else if (timerPaused) {
       return (
         <>
-          <span>
-            Paused on {days}d {formatTimeValue(hours)}:
-            {formatTimeValue(minutes)}:{formatTimeValue(seconds)}
-          </span>
-          <button onClick={handlePauseResume}> Resume</button>
+          <span>Paused on {formattedTime}</span>
+          <button className="pause-button" onClick={handlePauseResume}>
+            Resume
+          </button>
         </>
       );
     } else {
       return (
         <>
-          <span>
-            {days}d {formatTimeValue(hours)}:{formatTimeValue(minutes)}:
-            {formatTimeValue(seconds)}
-          </span>
-          <button onClick={handlePauseResume}> Pause</button>
+          <span>{formattedTime}</span>
+          <button className="pause-button" onClick={handlePauseResume}>
+            Pause
+          </button>
         </>
       );
     }
   };
 
-  const [isEditing, setEditing] = useState<boolean>(false);
-  const [savedDescription, setSavedDescription] = useState<string>("");
-  // const [isChecked, setIsChecked] = useState<boolean>(completed);
+  const [isEditing, setEditing] = useState(false);
+  const [savedDescription, setSavedDescription] = useState("");
   const [timerCompleted, setTimerCompleted] = useState(false);
   const [timerPaused, setTimerPaused] = useState(false);
   const [isCountdownVisible, setCountdownVisible] = useState(false);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const countdownRef = useRef<CountdownApi>(null);
 
   useEffect(() => {
     const time = (dd * 86400 + hh * 3600 + mm * 60 + ss) * 1000;
@@ -166,7 +169,7 @@ const Task: React.FC<TaskProps> = ({
       if (startTime && remainingMs) {
         if (localStorage.getItem(`task_${id}_paused`)) {
           setTimerPaused(true);
-          localStorage.setItem(`task_${id}_startTime`, Date.now());
+          localStorage.setItem(`task_${id}_startTime`, String(Date.now()));
           localStorage.setItem(`task_${id}_remainingMs`, remainingMs);
           setCountdownVisible(true);
           return;
@@ -174,17 +177,17 @@ const Task: React.FC<TaskProps> = ({
 
         const elapsedTime = Date.now() - parseInt(startTime);
         const updatedRemainingMs = parseInt(remainingMs) - elapsedTime;
-        localStorage.setItem(`task_${id}_startTime`, Date.now());
-        localStorage.setItem(`task_${id}_remainingMs`, updatedRemainingMs);
+        localStorage.setItem(`task_${id}_startTime`, String(Date.now()));
+        localStorage.setItem(
+          `task_${id}_remainingMs`,
+          String(updatedRemainingMs)
+        );
         setCountdownVisible(true);
       } else {
-        if (!time) localStorage.setItem(`task_${id}_empty`, 1);
-        if (!localStorage.getItem(`task_${id}_expired`)) {
-          localStorage.setItem(`task_${id}_startTime`, Date.now());
-          localStorage.setItem(`task_${id}_remainingMs`, time);
-        }
+        if (!time) localStorage.setItem(`task_${id}_empty`, "1");
+        localStorage.setItem(`task_${id}_startTime`, String(Date.now()));
+        localStorage.setItem(`task_${id}_remainingMs`, String(time));
       }
-      return;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -218,12 +221,12 @@ const Task: React.FC<TaskProps> = ({
             <Countdown
               date={
                 Date.now() +
-                parseInt(localStorage.getItem(`task_${id}_remainingMs`))
+                parseInt(localStorage.getItem(`task_${id}_remainingMs`) ?? "")
               }
-              ref={countdownRef}
+              ref={countdownRef as React.RefObject<Countdown>}
               onComplete={handleTimerCompleted}
               renderer={timerRenderer}
-              // onPause={handlePauseResume}
+              autoStart={!timerPaused || false}
             />
           )}
         </div>

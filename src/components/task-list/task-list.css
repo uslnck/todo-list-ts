@@ -99,10 +99,7 @@
 
 .todo-list li .icon-destroy {
   right: 10px;
-}
-
-.todo-list li .icon-destroy:after {
-  content: "×";
+  top: 89px;
 }
 
 .todo-list li .icon-edit {
@@ -110,7 +107,14 @@
   right: 45px;
 }
 
+.todo-list li .icon-destroy:after {
+  /* background-color: white; */
+  content: "×";
+  height: 10%;
+}
+
 .todo-list li .icon-edit:after {
+  /* background-color: white; */
   content: "✎";
 }
 

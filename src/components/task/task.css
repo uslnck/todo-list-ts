@@ -33,15 +33,11 @@
   font-size: 12px;
 }
 
-.timer {
-  color: #808080;
-  display: inline-block;
-
-  font-size: 12px;
-}
-
-.timer-button {
-  color: #808080;
-  font-size: 12px;
-  padding-left: 15px;
+.pause-button {
+  background-color: white;
+  border: 1px solid rgb(209, 141, 144);
+  border-radius: 2px;
+  margin-left: 5px;
+  padding-left: 2px;
+  padding-right: 2px;
 }
