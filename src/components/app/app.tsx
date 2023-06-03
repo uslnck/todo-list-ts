@@ -7,7 +7,7 @@ import fnsDate from "../../utils/helpers/fnsDate";
 
 export interface ITask {
   description: string;
-  created: Date;
+  created: number;
   id: number;
   completed: boolean;
   shownDate: string;
@@ -17,7 +17,6 @@ export interface ITask {
 interface IState {
   taskData: ITask[];
   filter: string;
-  // currentTime: Date;
 }
 
 export default class App extends Component<{}, IState> {
@@ -25,7 +24,7 @@ export default class App extends Component<{}, IState> {
     taskData: [
       {
         description: "First task",
-        created: new Date(),
+        created: Date.now(),
         id: 1,
         completed: false,
         shownDate: fnsDate(),
@@ -33,7 +32,7 @@ export default class App extends Component<{}, IState> {
       },
       {
         description: "Second task",
-        created: new Date(),
+        created: Date.now(),
         id: 2,
         completed: false,
         shownDate: fnsDate(),
@@ -41,7 +40,7 @@ export default class App extends Component<{}, IState> {
       },
       {
         description: "Third task",
-        created: new Date(),
+        created: Date.now(),
         id: 3,
         completed: false,
         shownDate: fnsDate(),
@@ -49,7 +48,6 @@ export default class App extends Component<{}, IState> {
       },
     ],
     filter: "all",
-    // currentTime: new Date(),
   };
 
   startId = 10;
@@ -58,28 +56,21 @@ export default class App extends Component<{}, IState> {
     this.startId += Math.floor(Math.random() * 1000000);
     localStorage.setItem("todos", JSON.stringify(this.state.taskData));
   }
-  //из локалстоража он берёт дейт для фнса, который при сохранении берёт текущую дату
+
   componentDidUpdate() {
     this.saveTodos();
-    // setInterval(() => {
-    //   this.refreshDates();
-    // }, 100);
+    setInterval(() => {
+      this.refreshDates();
+    }, 5100);
   }
 
   componentDidMount() {
     const storedTodos = localStorage.getItem("todos");
     if (storedTodos) this.setState({ taskData: JSON.parse(storedTodos) });
+    setInterval(() => {
+      this.refreshDates();
+    }, 5100);
   }
-
-  // componentWillUnmount() {
-  //   clearInterval(this.time);
-  // }
-
-  // updateCurrentTime = () => {
-  //   const currentTime = new Date();
-  //   localStorage.setItem('currentTime', JSON.stringify(currentTime));
-  //   this.setState({ currentTime });
-  // };
 
   setFilter = (pressedFilter: string): void => {
     switch (pressedFilter) {
@@ -149,7 +140,7 @@ export default class App extends Component<{}, IState> {
   ): void => {
     const newItem: ITask = {
       description: text,
-      created: new Date(),
+      created: Date.now(),
       id: this.startId,
       completed: false,
       shownDate: fnsDate(),
@@ -180,7 +171,6 @@ export default class App extends Component<{}, IState> {
       <div>
         <NewTaskForm onTaskAdded={this.addTask} />
         <TaskList
-          // refreshDates={this.refreshDates}
           todos={this.state.taskData}
           onDelete={this.handleTaskDelete}
           onClick={this.handleTaskClick}

@@ -5,8 +5,8 @@ const formatDistanceOptions = {
   includeSeconds: true,
 };
 
-const fnsDate = (created: Date | undefined = undefined) => {
-  return formatDistanceToNow(created || new Date(), formatDistanceOptions);
+const fnsDate = (created: number | undefined = undefined) => {
+  return formatDistanceToNow(created || Date.now(), formatDistanceOptions);
 };
 
 export default fnsDate;
