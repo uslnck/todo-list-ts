@@ -61,20 +61,27 @@ export default class NewTaskForm extends Component<
     });
   };
 
+  onSubmit = () => {
+    this.props.onTaskAdded(
+      this.state.label,
+      this.state.minutes,
+      this.state.seconds,
+      this.state.hours,
+      this.state.days
+    );
+    this.setState({
+      label: "",
+      seconds: 0,
+      minutes: 0,
+      hours: 0,
+      days: 0,
+    });
+  };
+
   handleGlobalKeyDown = (event: any) => {
     if (event.key === "Enter") {
-      this.props.onTaskAdded(
-        this.state.label,
-        this.state.minutes,
-        this.state.seconds,
-        this.state.hours,
-        this.state.days
-      );
-      this.setState({ label: "" });
-      this.setState({ seconds: 0 });
-      this.setState({ minutes: 0 });
-      this.setState({ hours: 0 });
-      this.setState({ days: 0 });
+      event.preventDefault();
+      this.onSubmit();
     }
   };
 
@@ -89,7 +96,7 @@ export default class NewTaskForm extends Component<
   render() {
     return (
       <>
-        <form>
+        <form onSubmit={this.onSubmit}>
           <header className="header">
             <input
               className="new-todo"
@@ -97,7 +104,7 @@ export default class NewTaskForm extends Component<
               autoFocus
               onChange={this.onLabelChange}
               value={this.state.label}
-              onKeyDown={this.handleGlobalKeyDown}
+              // onKeyDown={this.handleGlobalKeyDown}
             />
           </header>
         </form>
