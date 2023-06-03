@@ -37,21 +37,21 @@ export default class NewTaskForm extends Component<
     });
   };
 
-  onSubmit = (e: FormEvent<HTMLFormElement>): void => {
-    e.preventDefault();
-    this.props.onTaskAdded(
-      this.state.label,
-      this.state.minutes,
-      this.state.seconds,
-      this.state.hours,
-      this.state.days
-    );
-    this.setState({ label: "" });
-    this.setState({ seconds: 0 });
-    this.setState({ minutes: 0 });
-    this.setState({ hours: 0 });
-    this.setState({ days: 0 });
-  };
+  // onSubmit = (e: FormEvent<HTMLFormElement>): void => {
+  //   e.preventDefault();
+  //   this.props.onTaskAdded(
+  //     this.state.label,
+  //     this.state.minutes,
+  //     this.state.seconds,
+  //     this.state.hours,
+  //     this.state.days
+  //   );
+  //   this.setState({ label: "" });
+  //   this.setState({ seconds: 0 });
+  //   this.setState({ minutes: 0 });
+  //   this.setState({ hours: 0 });
+  //   this.setState({ days: 0 });
+  // };
 
   onMinutesChange = (e: ChangeEvent<HTMLInputElement>): void => {
     this.setState({
@@ -77,10 +77,35 @@ export default class NewTaskForm extends Component<
     });
   };
 
+  handleGlobalKeyDown = (event: any) => {
+    if (event.key === "Enter") {
+      this.props.onTaskAdded(
+        this.state.label,
+        this.state.minutes,
+        this.state.seconds,
+        this.state.hours,
+        this.state.days
+      );
+      this.setState({ label: "" });
+      this.setState({ seconds: 0 });
+      this.setState({ minutes: 0 });
+      this.setState({ hours: 0 });
+      this.setState({ days: 0 });
+    }
+  };
+
+  componentDidMount() {
+    document.addEventListener("keydown", this.handleGlobalKeyDown);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleGlobalKeyDown);
+  }
+
   render() {
     return (
       <>
-        <form onSubmit={this.onSubmit}>
+        <form>
           <header className="header">
             <input
               className="new-todo"
@@ -88,6 +113,7 @@ export default class NewTaskForm extends Component<
               autoFocus
               onChange={this.onLabelChange}
               value={this.state.label}
+              onKeyDown={this.handleGlobalKeyDown}
             />
           </header>
         </form>
