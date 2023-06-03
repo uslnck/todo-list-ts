@@ -27,3 +27,21 @@
 .description:focus {
   border: 2px solid rgb(13, 215, 13);
 }
+
+.created {
+  color: #808080;
+  font-size: 12px;
+}
+
+.timer {
+  color: #808080;
+  display: inline-block;
+
+  font-size: 12px;
+}
+
+.timer-button {
+  color: #808080;
+  font-size: 12px;
+  padding-left: 15px;
+}

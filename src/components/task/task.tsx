@@ -1,7 +1,8 @@
+//@ts-nocheck
 import { useRef, useState, useEffect } from "react";
 import "./task.css";
-
 import { ITask } from "../app/app";
+import Countdown from "react-countdown";
 
 interface TaskProps extends ITask {
   todo: ITask;
@@ -15,15 +16,14 @@ const Task: React.FC<TaskProps> = ({
   shownDate,
   onDelete,
   onClick,
+  id,
+  countdownValues,
 }: TaskProps) => {
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [mm, ss, hh, dd] = countdownValues;
+
   const { completed } = todo;
   let classNames = "description";
   if (completed) classNames += " completed";
-
-  const [isEditing, setEditing] = useState<boolean>(false);
-  const [savedDescription, setSavedDescription] = useState<string>("");
-  const [isChecked, setIsChecked] = useState<boolean>(completed);
 
   const handleEditButtonClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -35,10 +35,6 @@ const Task: React.FC<TaskProps> = ({
   const handleInputBlur = (): void => {
     setEditing(false);
   };
-
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, [isEditing]);
 
   const handleFocus = (e: React.FocusEvent<HTMLTextAreaElement>): void => {
     setSavedDescription(e.target.value);
@@ -58,11 +54,111 @@ const Task: React.FC<TaskProps> = ({
     if (!isEditing) onClick(e);
   };
 
+  const formatTimeValue = (value: any) => {
+    return value.toString().padStart(2, "0");
+  };
+
   const handleCheckboxChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ): void => {
-    setIsChecked(e.target.checked);
+    // setIsChecked(e.target.checked);
+    if (localStorage.getItem(`task_${id}_checked`))
+      localStorage.removeItem(`task_${id}_checked`);
+    else {
+      localStorage.setItem(`task_${id}_checked`, 1);
+      setTimerPaused(true);
+      const remainingMs = localStorage.getItem(`task_${id}_remainingMs`);
+      localStorage.setItem(`task_${id}_startTime`, Date.now());
+      localStorage.setItem(`task_${id}_remainingMs`, remainingMs);
+      setCountdownVisible(true);
+      // пока дальше отсчитывает в паузе
+    }
   };
+
+  const handleTimerCompleted = () => {
+    localStorage.setItem(`task_${id}_expired`, 1);
+    setTimerCompleted(true);
+  };
+
+  const handlePauseResume = () => {
+    if (timerPaused) localStorage.removeItem(`task_${id}_paused`);
+    else localStorage.setItem(`task_${id}_paused`, 1);
+    setTimerPaused(!timerPaused);
+  };
+
+  const timerRenderer = ({ days, hours, minutes, seconds }: any): any => {
+    if (localStorage.getItem(`task_${id}_empty`))
+      return <span>Timer hasn't been set</span>;
+
+    if (localStorage.getItem(`task_${id}_expired`)) {
+      return <span>Timer expired</span>;
+    } else if (timerPaused) {
+      return (
+        <div>
+          <span>Timer paused</span>
+          <button onClick={handlePauseResume}> Resume</button>
+        </div>
+      );
+    } else {
+      return (
+        <>
+          <span>
+            {days}d {formatTimeValue(hours)}:{formatTimeValue(minutes)}:
+            {formatTimeValue(seconds)}
+          </span>
+          <button onClick={handlePauseResume}> Pause</button>
+        </>
+      );
+    }
+  };
+
+  const [isEditing, setEditing] = useState<boolean>(false);
+  const [savedDescription, setSavedDescription] = useState<string>("");
+  // const [isChecked, setIsChecked] = useState<boolean>(completed);
+  const [timerCompleted, setTimerCompleted] = useState(false);
+  const [timerPaused, setTimerPaused] = useState(false);
+  const [isCountdownVisible, setCountdownVisible] = useState(false);
+
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const time = (dd * 86400 + hh * 3600 + mm * 60 + ss) * 1000;
+
+    //без этой коррекции интервалом время рассчитывается неверно при паузах/обновлениях
+    //наименьший интервал = лучшая коррекция, иначе придётся много обновлять страницу
+    setInterval(() => {
+      const startTime = localStorage.getItem(`task_${id}_startTime`);
+      const remainingMs = localStorage.getItem(`task_${id}_remainingMs`);
+
+      if (startTime && remainingMs) {
+        if (localStorage.getItem(`task_${id}_paused`)) {
+          setTimerPaused(true);
+          localStorage.setItem(`task_${id}_startTime`, Date.now());
+          localStorage.setItem(`task_${id}_remainingMs`, remainingMs);
+          setCountdownVisible(true);
+          return;
+        }
+
+        const elapsedTime = Date.now() - parseInt(startTime);
+        const updatedRemainingMs = parseInt(remainingMs) - elapsedTime;
+        localStorage.setItem(`task_${id}_startTime`, Date.now());
+        localStorage.setItem(`task_${id}_remainingMs`, updatedRemainingMs);
+        setCountdownVisible(true);
+      } else {
+        if (!time) localStorage.setItem(`task_${id}_empty`, 1);
+        if (!localStorage.getItem(`task_${id}_expired`)) {
+          localStorage.setItem(`task_${id}_startTime`, Date.now());
+          localStorage.setItem(`task_${id}_remainingMs`, time);
+        }
+      }
+      return;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, [isEditing]);
 
   return (
     <>
@@ -71,7 +167,7 @@ const Task: React.FC<TaskProps> = ({
           className="toggle"
           type="checkbox"
           onClick={handleClick}
-          checked={isChecked}
+          checked={localStorage.getItem(`task_${id}_checked`) === "1"}
           onChange={handleCheckboxChange}
         />
         <textarea
@@ -84,6 +180,20 @@ const Task: React.FC<TaskProps> = ({
           onFocus={handleFocus}
         />
         <span className="created">{shownDate}</span>
+        <div className="created">
+          {isCountdownVisible && (
+            <Countdown
+              date={
+                Date.now() +
+                parseInt(localStorage.getItem(`task_${id}_remainingMs`))
+              }
+              onComplete={handleTimerCompleted}
+              renderer={timerRenderer}
+              // @ts-ignore
+              // paused={timerPaused}
+            />
+          )}
+        </div>
       </div>
       <button
         className="icon icon-edit"

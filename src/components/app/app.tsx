@@ -1,7 +1,6 @@
 import TaskList from "../task-list";
 import NewTaskForm from "../new-task-form";
 import Footer from "../footer";
-
 import { Component, MouseEvent } from "react";
 import "./app.css";
 import fnsDate from "../../utils/helpers/fnsDate";
@@ -12,11 +11,13 @@ export interface ITask {
   id: number;
   completed: boolean;
   shownDate: string;
+  countdownValues: any;
 }
 
 interface IState {
   taskData: ITask[];
   filter: string;
+  // currentTime: Date;
 }
 
 export default class App extends Component<{}, IState> {
@@ -28,6 +29,7 @@ export default class App extends Component<{}, IState> {
         id: 1,
         completed: false,
         shownDate: fnsDate(),
+        countdownValues: [59, 59, 23, 1],
       },
       {
         description: "Second task",
@@ -35,6 +37,7 @@ export default class App extends Component<{}, IState> {
         id: 2,
         completed: false,
         shownDate: fnsDate(),
+        countdownValues: [59, 59, 23, 0],
       },
       {
         description: "Third task",
@@ -42,12 +45,41 @@ export default class App extends Component<{}, IState> {
         id: 3,
         completed: false,
         shownDate: fnsDate(),
+        countdownValues: [59, 59, 23, 2],
       },
     ],
     filter: "all",
+    // currentTime: new Date(),
   };
 
-  maxId = 10;
+  startId = 10;
+
+  saveTodos() {
+    this.startId += Math.floor(Math.random() * 1000000);
+    localStorage.setItem("todos", JSON.stringify(this.state.taskData));
+  }
+  //из локалстоража он берёт дейт для фнса, который при сохранении берёт текущую дату
+  componentDidUpdate() {
+    this.saveTodos();
+    // setInterval(() => {
+    //   this.refreshDates();
+    // }, 100);
+  }
+
+  componentDidMount() {
+    const storedTodos = localStorage.getItem("todos");
+    if (storedTodos) this.setState({ taskData: JSON.parse(storedTodos) });
+  }
+
+  // componentWillUnmount() {
+  //   clearInterval(this.time);
+  // }
+
+  // updateCurrentTime = () => {
+  //   const currentTime = new Date();
+  //   localStorage.setItem('currentTime', JSON.stringify(currentTime));
+  //   this.setState({ currentTime });
+  // };
 
   setFilter = (pressedFilter: string): void => {
     switch (pressedFilter) {
@@ -108,21 +140,26 @@ export default class App extends Component<{}, IState> {
     return counter;
   };
 
-  addTask = (text: string): void => {
+  addTask = (
+    text: string,
+    mm: number,
+    ss: number,
+    hh: number,
+    dd: number
+  ): void => {
     const newItem: ITask = {
       description: text,
       created: new Date(),
-      id: this.maxId++,
+      id: this.startId,
       completed: false,
       shownDate: fnsDate(),
+      countdownValues: [mm, ss, hh, dd],
     };
 
     this.setState(({ taskData }) => {
       const newTaskData = [...taskData, newItem];
       return { taskData: newTaskData };
     });
-
-    this.refreshDates();
   };
 
   refreshDates = (): void => {
@@ -143,6 +180,7 @@ export default class App extends Component<{}, IState> {
       <div>
         <NewTaskForm onTaskAdded={this.addTask} />
         <TaskList
+          // refreshDates={this.refreshDates}
           todos={this.state.taskData}
           onDelete={this.handleTaskDelete}
           onClick={this.handleTaskClick}
