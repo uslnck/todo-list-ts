@@ -3,5 +3,11 @@
 }
 
 .filters li button.selected {
-  border-color: rgba(175, 47, 47, 0.2);
+  background-color: white;
+  border: 1px solid rgb(209, 141, 144);
+  border-radius: 2px;
+}
+
+.filters li:hover button {
+  text-decoration: underline;
 }

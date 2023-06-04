@@ -26,8 +26,6 @@
 }
 
 .todo-list li .toggle {
-  /* -webkit-appearance: none; */
-  /* appearance: none; */
   border: none;
   bottom: 0;
   cursor: pointer;
@@ -39,10 +37,6 @@
   top: 0;
   width: 25px;
 }
-
-/* .todo-list li .toggle {
-  opacity: 0;
-} */
 
 .todo-list li .toggle + label {
   background-image: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23ededed%22%20stroke-width%3D%223%22/%3E%3C/svg%3E");
@@ -94,7 +88,7 @@
 }
 
 .todo-list li .icon:hover {
-  color: #af5b5e;
+  color: #d55054;
 }
 
 .todo-list li .icon-destroy {
@@ -108,13 +102,11 @@
 }
 
 .todo-list li .icon-destroy:after {
-  /* background-color: white; */
   content: "×";
   height: 10%;
 }
 
 .todo-list li .icon-edit:after {
-  /* background-color: white; */
   content: "✎";
 }
 
